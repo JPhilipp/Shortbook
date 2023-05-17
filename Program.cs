@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Media;
 
 public class Program
 {
@@ -160,7 +161,8 @@ public class Program
 
     static async Task SummarizeBookChunks(string originalsFolder, string summariesFolder, string[] bookChunks)
     {
-        const int max = 55;
+        // 5 at a time works well, more and you may hit rate-limiting.
+        const int max = 105;
         var tasks = new List<Task>();
 
         for (int i = 0; i < bookChunks.Length && i < max; i++)
@@ -176,6 +178,20 @@ public class Program
         }
 
         await Task.WhenAll(tasks);
+
+        Console.WriteLine("SummarizeBookChunks done!");
+        
+        PlaySuccessSound();
+    }
+
+    static void PlaySuccessSound()
+    {
+        const string soundPath = ".\\sounds\\success.wav";
+        using (var soundPlayer = new SoundPlayer(soundPath))
+        {
+            Console.WriteLine($"Playing success sound: {soundPath}");
+            soundPlayer.PlaySync();
+        }
     }
 
     static async Task SummarizeAndWriteFile(string chunk, string originalsFolder, string summariesFolder, string fileName, int chunkNumber, int totalChunks)
