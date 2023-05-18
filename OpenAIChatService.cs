@@ -21,6 +21,8 @@ public class OpenAiChatService
     // Optionally, e.g. "Write in the style of Douglas Adams."
     public string additionalSummaryInstructions = null;
 
+    public bool addSummaryHeadlines = false;
+
     public OpenAiChatService(string keyPath)
     {
         apiKey = File.ReadAllText(keyPath).Trim();
@@ -35,14 +37,20 @@ public class OpenAiChatService
         string role = "You are a helpful assistant. " +
             "Please shorten the provided book excerpt while keeping the narrative perspective and style. " +
             "Include speech of characters, also shortened.";
+        
+        if (addSummaryHeadlines)
+        {
+            role += " If there is a scene switch or similar, add an all-caps headline.";
+        }
         if (!string.IsNullOrEmpty(summaryLanguage))
         {
-            role += $" Write in {summaryLanguage}.";
+            role += " Write in " + summaryLanguage + ".";
         }
         if (!string.IsNullOrEmpty(additionalSummaryInstructions))
         {
             role += " " + additionalSummaryInstructions;
         }
+        Console.WriteLine(role);
 
         var prompt = new { model, messages = new object[] {
             new { role = "system", content = role },
