@@ -22,17 +22,12 @@ public class OpenAiChatService
         client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
     }
 
-    public async Task<string> GetSummary(string bookChunk, string language = null)
+    public async Task<string> GetSummary(string bookChunk)
     {
         string role = "You are a helpful assistant. " +
             "Please shorten the provided book excerpt while keeping the narrative perspective and style. " +
             "Include speech of characters, also shortened.";
-        if (!string.IsNullOrEmpty(language))
-        {
-            role += $" Write in {language}.";
-        }
-        Console.WriteLine("Role: " + role);
-
+    
         var prompt = new { model, messages = new object[] {
             new { role = "system", content = role },
             new { role = "user", content = bookChunk } },
