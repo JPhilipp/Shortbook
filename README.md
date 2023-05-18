@@ -22,7 +22,7 @@ The program still requires some hand-holding and takes a bit of time to run, but
 2. Install the [Kindle Windows app](https://www.amazon.com/kindlepcdownload/).
 3. Tune so you get a full-screen and full-width page display with a readable small font, as shown in the screenshot, and page to page 1.
 
-![image](https://github.com/JPhilipp/Shortbook/assets/1754503/c971e8b9-eb01-4772-a111-65a1561093c8)
+![image](https://github.com/JPhilipp/Shortbook/assets/1754503/b1a27fc2-1090-4e58-b538-17917e115b5e)
 
 4. Open the project in e.g. VS Code, install the C# extension, and set all the appropriate setting values in the `Main()` function. This will need some care and trying out, e.g. to get the correct number of right-arrow-presses (the maxPages number) which the program will trigger.
 5. Out-comment the different process functions one at a time, starting with `SavePagesAsImages()`, and always hit F5 to run.
