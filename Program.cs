@@ -35,33 +35,19 @@ public class Program
     const int chunksAtATimeToKeepToRateLimit = 5;
     static OpenAiChatService? chatService;
 
-    public static bool FindAndFrontKindleWindow(IntPtr hWnd, IntPtr lParam)
-    {
-        const string titlePartToMatch = "Kindle for PC";
-
-        int size = GetWindowTextLength(hWnd);
-        if (size++ > 0 && IsWindowVisible(hWnd))
-        {
-            StringBuilder sb = new StringBuilder(size);
-            GetWindowText(hWnd, sb, size);
-            if (sb.ToString().Contains(titlePartToMatch))
-            {
-                SetForegroundWindow(hWnd);
-                windowHandle = hWnd;
-                SetForegroundWindow(hWnd);
-                return false;
-            }
-        }
-        return true;
-    }
-
     public static async Task Main()
     {
-        Console.WriteLine("Starting Main...");
+        // --- Set below values accordingly for each book you want to shorten. ---
 
         const string bookName = "SnowCrashGerman";
         const int maxPages = 283;
-        chatService = new OpenAiChatService();
+
+        // keyPath should point to a text file containing your OpenAI API key.
+        // Note that this will make API requests that cost money, use at your own risk.
+        chatService = new OpenAiChatService(keyPath: @"D:\_misc\openai-key.txt");
+
+        // chatService.summaryLanguage = "German";
+        chatService.additionalSummaryInstructions = "Write in the style of Douglas Adams.";
 
         const string projectFolder = "D:\\Shortbook";
         const string dataFolder = projectFolder + "\\Data\\" + bookName;
@@ -77,8 +63,11 @@ public class Program
 
         System.IO.Directory.CreateDirectory(screenshotsFolder);
 
+        // --- Use below one by one, as this still requires some hand-holding and checks. ---
+
         // SavePagesAsImages(screenshotsFolder, maxPages);
         // SaveTextOfImages(tessdataFolder, screenshotsFolder, textFile, maxPages, TesseractLanguage.Languages.German);
+        
         await SaveSummariesOfText(textFile, originalsFolder, summariesFolder);
         // CombineSummariesIntoSingleFile(summariesFolder, allFile);
         
@@ -145,7 +134,7 @@ public class Program
             }
         }
 
-        File.WriteAllLines(allFile, summaries);
+        File.WriteAllText(allFile, string.Join("\n\n", summaries));
     }
 
     static async Task SaveSummariesOfText(string textFile, string originalsFolder, string summariesFolder)
@@ -285,5 +274,26 @@ public class Program
         }
 
         System.IO.File.WriteAllText(textFile, sb.ToString());
+    }
+
+
+    public static bool FindAndFrontKindleWindow(IntPtr hWnd, IntPtr lParam)
+    {
+        const string titlePartToMatch = "Kindle for PC";
+
+        int size = GetWindowTextLength(hWnd);
+        if (size++ > 0 && IsWindowVisible(hWnd))
+        {
+            StringBuilder sb = new StringBuilder(size);
+            GetWindowText(hWnd, sb, size);
+            if (sb.ToString().Contains(titlePartToMatch))
+            {
+                SetForegroundWindow(hWnd);
+                windowHandle = hWnd;
+                SetForegroundWindow(hWnd);
+                return false;
+            }
+        }
+        return true;
     }
 }

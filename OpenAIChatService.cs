@@ -9,11 +9,17 @@ public class OpenAiChatService
     const string openAiUrl = "https://api.openai.com/v1/chat/completions";
     const string model = "gpt-4";
 
-    const string keyPath = @"D:\_misc\openai-key.txt";
     readonly string apiKey;
     readonly HttpClient client;
 
-    public OpenAiChatService()
+    // You can define a summary language like "German", though it mostly
+    // also works without setting it, based on the original's language.
+    public string summaryLanguage = null;
+
+    // Optionally, e.g. "Write in the style of Douglas Adams."
+    public string additionalSummaryInstructions = null;
+
+    public OpenAiChatService(string keyPath)
     {
         apiKey = File.ReadAllText(keyPath).Trim();
         client = new HttpClient();
@@ -27,7 +33,15 @@ public class OpenAiChatService
         string role = "You are a helpful assistant. " +
             "Please shorten the provided book excerpt while keeping the narrative perspective and style. " +
             "Include speech of characters, also shortened.";
-    
+        if (!string.IsNullOrEmpty(summaryLanguage))
+        {
+            role += $" Write in {summaryLanguage}.";
+        }
+        if (!string.IsNullOrEmpty(additionalSummaryInstructions))
+        {
+            role += " " + additionalSummaryInstructions;
+        }
+
         var prompt = new { model, messages = new object[] {
             new { role = "system", content = role },
             new { role = "user", content = bookChunk } },
