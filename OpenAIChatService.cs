@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-public class OpenAiChatService
+public class OpenAiChatBookService
 {
     const string openAiUrl = "https://api.openai.com/v1/chat/completions";
     const string model = "gpt-4";
@@ -23,7 +23,7 @@ public class OpenAiChatService
 
     public bool addSummaryHeadlines = false;
 
-    public OpenAiChatService(string keyPath)
+    public OpenAiChatBookService(string keyPath)
     {
         apiKey = File.ReadAllText(keyPath).Trim();
         client = new HttpClient();
@@ -50,38 +50,8 @@ public class OpenAiChatService
         {
             role += " " + additionalSummaryInstructions;
         }
-        Console.WriteLine(role);
-
-        var prompt = new { model, messages = new object[] {
-            new { role = "system", content = role },
-            new { role = "user", content = bookChunk } },
-            max_tokens = 4096
-        };
-        var content = new StringContent(JsonConvert.SerializeObject(prompt), Encoding.UTF8, "application/json");
-
-        var response = await client.PostAsync(openAiUrl, content);
-
-        if (response.IsSuccessStatusCode)
-        {
-            var responseString = await response.Content.ReadAsStringAsync();
-            var responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
-            Console.WriteLine(responseString);
-
-            if (responseObject?["choices"]?[0]?["message"]?["content"] != null)
-            {
-                string summary = responseObject["choices"][0]["message"]["content"].ToString();
-                return summary;
-            }
-            else
-            {
-                throw new Exception("Unexpected response structure from OpenAI API");
-            }
-        }
-        else
-        {
-            var errorContent = await response.Content.ReadAsStringAsync();
-            throw new Exception($"Failed to communicate with OpenAI API. Status code: {response.StatusCode}. Response content: {errorContent}");
-        }
+        
+        return await PostAsync(role, bookChunk);
     }
 
     public async Task<string> GetTranslation(string bookChunk)
@@ -90,15 +60,25 @@ public class OpenAiChatService
         string role = "You are a helpful assistant. " +
             "Please translate the provided book excerpt to " + translationLanguage + ".";
 
-        var prompt = new { model, messages = new object[] {
-            new { role = "system", content = role },
-            new { role = "user", content = bookChunk } },
+        return await PostAsync(role, bookChunk);
+    }
+
+    public async Task<string> PostAsync(string role, string bookChunk)
+    {
+        var prompt = new
+        {
+            model,
+            messages = new object[]
+            {
+                new { role = "system", content = role },
+                new { role = "user", content = bookChunk },
+            },
             max_tokens = 4096
         };
+
         var content = new StringContent(JsonConvert.SerializeObject(prompt), Encoding.UTF8, "application/json");
 
         var response = await client.PostAsync(openAiUrl, content);
-
         if (response.IsSuccessStatusCode)
         {
             var responseString = await response.Content.ReadAsStringAsync();
@@ -107,8 +87,7 @@ public class OpenAiChatService
 
             if (responseObject?["choices"]?[0]?["message"]?["content"] != null)
             {
-                string summary = responseObject["choices"][0]["message"]["content"].ToString();
-                return summary;
+                return responseObject["choices"][0]["message"]["content"].ToString();
             }
             else
             {
@@ -118,7 +97,10 @@ public class OpenAiChatService
         else
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            throw new Exception($"Failed to communicate with OpenAI API. Status code: {response.StatusCode}. Response content: {errorContent}");
+            throw new Exception($"Failed to communicate with OpenAI API. " +
+                "Status code: {response.StatusCode}. Response content: {errorContent}"
+            );
         }
     }
+
 }

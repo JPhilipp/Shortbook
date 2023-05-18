@@ -33,18 +33,18 @@ public class Program
 
     const int maxChunkSizeKb = 10;
     const int chunksAtATimeToKeepToRateLimit = 5;
-    static OpenAiChatService? chatService;
+    static OpenAiChatBookService? chatService;
 
     public static async Task Main()
     {
         // --- Set below values accordingly for each book you want to shorten. ---
 
-        const string bookName = "SnowCrash";
+        const string bookName = "SnowCrashGerman";
         const int maxPages = 121;
 
         // keyPath should point to a text file containing your OpenAI API key.
         // Note that this will make API requests that cost money, use at your own risk.
-        chatService = new OpenAiChatService(keyPath: @"D:\_misc\openai-key.txt");
+        chatService = new OpenAiChatBookService(keyPath: @"D:\_misc\openai-key.txt");
 
         // chatService.summaryLanguage = "German";
         // chatService.translationLanguage = "German";
@@ -70,7 +70,7 @@ public class Program
         // SavePagesAsImages(screenshotsFolder, maxPages);
         // SaveTextOfImages(tessdataFolder, screenshotsFolder, textFile, maxPages, TesseractLanguage.Languages.German);
         
-        // await SaveSummariesOfText(textFile, originalsFolder, summariesFolder);
+        await SaveSummariesOfText(textFile, originalsFolder, summariesFolder);
         // CombineSummariesIntoSingleFile(summariesFolder, allFile);
 
         // Note instead of translating the summaries (as defined by chatService.translationLanguage),
@@ -280,7 +280,6 @@ public class Program
 
         System.IO.File.WriteAllText(textFile, sb.ToString());
     }
-
 
     public static bool FindAndFrontKindleWindow(IntPtr hWnd, IntPtr lParam)
     {
