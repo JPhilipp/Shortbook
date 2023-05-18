@@ -70,7 +70,7 @@ public class Program
         // SavePagesAsImages(screenshotsFolder, maxPages);
         // SaveTextOfImages(tessdataFolder, screenshotsFolder, textFile, maxPages, TesseractLanguage.Languages.German);
         
-        await SaveSummariesOfText(textFile, originalsFolder, summariesFolder);
+        // await SaveSummariesOfText(textFile, originalsFolder, summariesFolder);
         
         // Note instead of translating the summaries (as defined by chatService.translationLanguage),
         // you can also directly have the summaries be generated in your target language (as defined
