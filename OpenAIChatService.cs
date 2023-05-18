@@ -16,6 +16,8 @@ public class OpenAiChatService
     // also works without setting it, based on the original's language.
     public string summaryLanguage = null;
 
+    public string translationLanguage = null;
+
     // Optionally, e.g. "Write in the style of Douglas Adams."
     public string additionalSummaryInstructions = null;
 
@@ -76,8 +78,9 @@ public class OpenAiChatService
 
     public async Task<string> GetTranslation(string bookChunk)
     {
-        const string role = "You are a helpful assistant. " +
-            "Please translate the provided book excerpt to German.";
+        translationLanguage = translationLanguage ?? "German";
+        string role = "You are a helpful assistant. " +
+            "Please translate the provided book excerpt to " + translationLanguage + ".";
 
         var prompt = new { model, messages = new object[] {
             new { role = "system", content = role },

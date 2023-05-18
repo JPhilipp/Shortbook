@@ -47,6 +47,7 @@ public class Program
         chatService = new OpenAiChatService(keyPath: @"D:\_misc\openai-key.txt");
 
         // chatService.summaryLanguage = "German";
+        // chatService.translationLanguage = "German";
         chatService.additionalSummaryInstructions = "Write in the style of Douglas Adams.";
 
         const string projectFolder = "D:\\Shortbook";
@@ -68,10 +69,14 @@ public class Program
         // SavePagesAsImages(screenshotsFolder, maxPages);
         // SaveTextOfImages(tessdataFolder, screenshotsFolder, textFile, maxPages, TesseractLanguage.Languages.German);
         
-        await SaveSummariesOfText(textFile, originalsFolder, summariesFolder);
-        // CombineSummariesIntoSingleFile(summariesFolder, allFile);
+        // await SaveSummariesOfText(textFile, originalsFolder, summariesFolder);
         
-        // await TranslateSummaries(summariesFolder, summariesFolderGerman);
+        
+        // Note instead of translating the summaries (as defined by chatService.translationLanguage),
+        // you can also directly have the summaries be generated in your target language (as defined
+        // by chatService.summaryLanguage).
+        
+        // CombineSummariesIntoSingleFile(summariesFolder, allFile);
         // CombineSummariesIntoSingleFile(summariesFolderGerman, allFileGerman);
     }
 
