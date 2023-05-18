@@ -32,6 +32,7 @@ public class Program
     static IntPtr windowHandle = IntPtr.Zero;
 
     const int MaxChunkSizeKb = 10;
+    const int chunksAtATimeToKeepToRateLimit = 5;
     static OpenAiChatService? chatService;
 
     public static bool FindAndFrontKindleWindow(IntPtr hWnd, IntPtr lParam)
@@ -87,29 +88,29 @@ public class Program
 
     static async Task TranslateSummaries(string summariesFolder, string summariesFolderGerman)
     {
-        const int max = 30;
-
         Directory.CreateDirectory(summariesFolderGerman);
 
-        var files = Directory.GetFiles(summariesFolder).OrderBy(f => int.Parse(Path.GetFileNameWithoutExtension(f)));
+        var files = Directory.GetFiles(summariesFolder).OrderBy(f => int.Parse(Path.GetFileNameWithoutExtension(f))).ToArray();
 
-        var tasks = new List<Task>();
-        int i = 0;
-
-        foreach (var file in files)
+        for (int chunkFrom = 0; chunkFrom < files.Length; chunkFrom += chunksAtATimeToKeepToRateLimit)
         {
-            string fileName = Path.GetFileName(file);
+            var tasks = new List<Task>();
+            int chunkTo = chunkFrom + chunksAtATimeToKeepToRateLimit;
 
-            string translationPath = Path.Combine(summariesFolderGerman, fileName);
-            if (!File.Exists(translationPath))
+            for (int i = chunkFrom; i < chunkTo && i < files.Length; i++)
             {
-                tasks.Add(TranslateFile(file, translationPath));
+                var file = files[i];
+                string fileName = Path.GetFileName(file);
+
+                string translationPath = Path.Combine(summariesFolderGerman, fileName);
+                if (!File.Exists(translationPath))
+                {
+                    tasks.Add(TranslateFile(file, translationPath));
+                }
             }
 
-            if (i++ > max) { break; }
+            await Task.WhenAll(tasks);
         }
-
-        await Task.WhenAll(tasks);
     }
 
     static async Task TranslateFile(string filePath, string translationPath)
@@ -161,23 +162,26 @@ public class Program
 
     static async Task SummarizeBookChunks(string originalsFolder, string summariesFolder, string[] bookChunks)
     {
-        // 5 at a time works well, more and you may hit rate-limiting.
-        const int max = 5;
-        var tasks = new List<Task>();
-
-        for (int i = 0; i < bookChunks.Length && i < max; i++)
+        for (int chunkFrom = 0; chunkFrom < bookChunks.Length; chunkFrom += chunksAtATimeToKeepToRateLimit)
         {
-            string chunk = bookChunks[i];
-            string fileName = (i + 1) + ".txt";
+            var tasks = new List<Task>();
 
-            if (!File.Exists(summariesFolder + "\\" + fileName))
+            int chunkTo = chunkFrom + chunksAtATimeToKeepToRateLimit;
+
+            for (int i = chunkFrom; i < chunkTo && i < bookChunks.Length; i++)
             {
-                var task = SummarizeAndWriteFile(chunk, originalsFolder, summariesFolder, fileName, i + 1, bookChunks.Length);
-                tasks.Add(task);
-            }
-        }
+                string chunk = bookChunks[i];
+                string fileName = (i + 1) + ".txt";
 
-        await Task.WhenAll(tasks);
+                if (!File.Exists(summariesFolder + "\\" + fileName))
+                {
+                    var task = SummarizeAndWriteFile(chunk, originalsFolder, summariesFolder, fileName, i + 1, bookChunks.Length);
+                    tasks.Add(task);
+                }
+            }
+
+            await Task.WhenAll(tasks);
+        }
 
         Console.WriteLine("SummarizeBookChunks done!");
         
