@@ -58,8 +58,8 @@ public class Program
     {
         Console.WriteLine("Starting Main...");
 
-        const string bookName = "StrangerInAStrangeLand";
-        const int maxPages = 266;
+        const string bookName = "SnowCrashGerman";
+        const int maxPages = 283;
         chatService = new OpenAiChatService();
 
         const string projectFolder = "D:\\Shortbook";
@@ -77,7 +77,7 @@ public class Program
         System.IO.Directory.CreateDirectory(screenshotsFolder);
 
         // SavePagesAsImages(screenshotsFolder, maxPages);
-        // SaveTextOfImages(tessdataFolder, screenshotsFolder, textFile, maxPages);
+        // SaveTextOfImages(tessdataFolder, screenshotsFolder, textFile, maxPages, TesseractLanguage.Languages.German);
         await SaveSummariesOfText(textFile, originalsFolder, summariesFolder);
         // CombineSummariesIntoSingleFile(summariesFolder, allFile);
         
@@ -162,7 +162,7 @@ public class Program
     static async Task SummarizeBookChunks(string originalsFolder, string summariesFolder, string[] bookChunks)
     {
         // 5 at a time works well, more and you may hit rate-limiting.
-        const int max = 105;
+        const int max = 5;
         var tasks = new List<Task>();
 
         for (int i = 0; i < bookChunks.Length && i < max; i++)
@@ -261,9 +261,11 @@ public class Program
         }
     }
 
-    static void SaveTextOfImages(string tessdataFolder, string screenshotsFolder, string textFile, int maxPages)
+    static void SaveTextOfImages(string tessdataFolder, string screenshotsFolder, string textFile, int maxPages, TesseractLanguage.Languages language = TesseractLanguage.Languages.English)
     {
-        var ocr = new Tesseract.TesseractEngine(tessdataFolder, "eng", Tesseract.EngineMode.Default);
+        var ocr = new Tesseract.TesseractEngine(
+            tessdataFolder, TesseractLanguage.GetLanguageCode(language), Tesseract.EngineMode.Default
+        );
 
         var sb = new StringBuilder();
 
