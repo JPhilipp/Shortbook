@@ -31,7 +31,7 @@ public class Program
 
     static IntPtr windowHandle = IntPtr.Zero;
 
-    const int MaxChunkSizeKb = 10;
+    const int maxChunkSizeKb = 10;
     const int chunksAtATimeToKeepToRateLimit = 5;
     static OpenAiChatService? chatService;
 
@@ -39,8 +39,8 @@ public class Program
     {
         // --- Set below values accordingly for each book you want to shorten. ---
 
-        const string bookName = "SnowCrashGerman";
-        const int maxPages = 283;
+        const string bookName = "SnowCrash";
+        const int maxPages = 121;
 
         // keyPath should point to a text file containing your OpenAI API key.
         // Note that this will make API requests that cost money, use at your own risk.
@@ -71,12 +71,12 @@ public class Program
         // SaveTextOfImages(tessdataFolder, screenshotsFolder, textFile, maxPages, TesseractLanguage.Languages.German);
         
         // await SaveSummariesOfText(textFile, originalsFolder, summariesFolder);
-        
+        // CombineSummariesIntoSingleFile(summariesFolder, allFile);
+
         // Note instead of translating the summaries (as defined by chatService.translationLanguage),
         // you can also directly have the summaries be generated in your target language (as defined
         // by chatService.summaryLanguage).
         
-        // CombineSummariesIntoSingleFile(summariesFolder, allFile);
         // CombineSummariesIntoSingleFile(summariesFolderGerman, allFileGerman);
     }
 
@@ -212,7 +212,7 @@ public class Program
 
         foreach (string section in sections)
         {
-            if (Encoding.UTF8.GetByteCount(currentChunk.ToString() + "\n\n" + section) / 1024.0 > MaxChunkSizeKb)
+            if (Encoding.UTF8.GetByteCount(currentChunk.ToString() + "\n\n" + section) / 1024.0 > maxChunkSizeKb)
             {
                 chunks.Add(currentChunk.ToString());
                 currentChunk.Clear();
