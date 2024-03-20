@@ -14,14 +14,15 @@ public class OpenAiChatBookService
 
     // You can define a summary language like "German", though it mostly
     // also works without setting it, based on the original's language.
-    public string summaryLanguage = null;
+    public string? summaryLanguage = null;
 
-    public string translationLanguage = null;
+    public string? translationLanguage = null;
 
     // Optionally, e.g. "Write in the style of Douglas Adams."
-    public string additionalSummaryInstructions = null;
+    public string? additionalSummaryInstructions = null;
 
     public bool addSummaryHeadlines = false;
+    public bool addSummaryImages = false;
 
     public OpenAiChatBookService(string keyPath)
     {
@@ -34,10 +35,15 @@ public class OpenAiChatBookService
 
     public async Task<string> GetSummary(string bookChunk)
     {
-        string role = "You are a helpful assistant. " +
-            "Please shorten the provided book excerpt while keeping the narrative perspective and style. " +
+        string role = "You are a helpful assistant.";
+
+        role += " Please shorten the provided book excerpt while keeping the narrative perspective and style. " +
             "Include speech of characters, also shortened.";
-        
+
+        if (addSummaryImages)
+        {
+            role += " Above every paragraph, add in square brackets a visual description of it for an image generator, using only commonly known words.";
+        }
         if (addSummaryHeadlines)
         {
             role += " If there is a scene switch or similar, add an all-caps headline.";

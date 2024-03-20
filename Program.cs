@@ -10,6 +10,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Media;
 
+#pragma warning disable CS0219 // Warning for unused variables, as we're commenting out things.
+#pragma warning disable CS1998 // Warning for async method without await, as we're commenting out things.
+#pragma warning disable CA1416 // Warning for reachable on all platforms, as we're commenting out things.
+#pragma warning disable CS8602 // Warning for dereferencing a possibly null reference.
+
 public class Program
 {
     [DllImport("user32.dll")]
@@ -39,8 +44,8 @@ public class Program
     {
         // --- Set below values accordingly for each book you want to shorten. ---
 
-        const string bookName = "SnowCrashGerman";
-        const int maxPages = 121;
+        const string bookName = "SomeBookName";
+        const int maxPages = 64;
 
         // keyPath should point to a text file containing your OpenAI API key.
         // Note that this will make API requests that cost money, use at your own risk.
@@ -50,6 +55,7 @@ public class Program
         // chatService.translationLanguage = "German";
         // chatService.additionalSummaryInstructions = "Write in the style of Douglas Adams.";
         // chatService.addSummaryHeadlines = true;
+        // chatService.addSummaryImages = true;
 
         const string projectFolder = "D:\\Shortbook";
         const string dataFolder = projectFolder + "\\Data\\" + bookName;
@@ -65,19 +71,26 @@ public class Program
 
         System.IO.Directory.CreateDirectory(screenshotsFolder);
 
-        // --- Use below one by one, as this still requires some hand-holding and checks. ---
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            // --- Use below one by one, as this still requires some hand-holding and checks. ---
 
-        // SavePagesAsImages(screenshotsFolder, maxPages);
-        // SaveTextOfImages(tessdataFolder, screenshotsFolder, textFile, maxPages, TesseractLanguage.Languages.German);
-        
-        await SaveSummariesOfText(textFile, originalsFolder, summariesFolder);
-        // CombineSummariesIntoSingleFile(summariesFolder, allFile);
+            // SavePagesAsImages(screenshotsFolder, maxPages);
 
-        // Note instead of translating the summaries (as defined by chatService.translationLanguage),
-        // you can also directly have the summaries be generated in your target language (as defined
-        // by chatService.summaryLanguage).
+            // SaveTextOfImages(tessdataFolder, screenshotsFolder, textFile, maxPages, TesseractLanguage.Languages.English);
+            
+            // await SaveSummariesOfText(textFile, originalsFolder, summariesFolder);
+
+            // CombineSummariesIntoSingleFile(summariesFolder, allFile);
+
+            // Note instead of translating the summaries (as defined by chatService.translationLanguage),
+            // you can also directly have the summaries be generated in your target language (as defined
+            // by chatService.summaryLanguage).
+            
+            // CombineSummariesIntoSingleFile(summariesFolderGerman, allFileGerman);
+        }
         
-        // CombineSummariesIntoSingleFile(summariesFolderGerman, allFileGerman);
+        Console.WriteLine("Done.");
     }
 
     static async Task TranslateSummaries(string summariesFolder, string summariesFolderGerman)
@@ -113,7 +126,6 @@ public class Program
 
         string summary = await File.ReadAllTextAsync(filePath);
         string translation = await chatService.GetTranslation(summary);
-
         await File.WriteAllTextAsync(translationPath, translation);
     }
 
@@ -156,6 +168,8 @@ public class Program
 
     static async Task SummarizeBookChunks(string originalsFolder, string summariesFolder, string[] bookChunks)
     {
+        // bookChunks = new string[] { bookChunks[0] };
+
         for (int chunkFrom = 0; chunkFrom < bookChunks.Length; chunkFrom += chunksAtATimeToKeepToRateLimit)
         {
             var tasks = new List<Task>();
